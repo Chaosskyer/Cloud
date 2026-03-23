@@ -5,15 +5,16 @@ import jakarta.annotation.Resource;
 import lzh.Order.bean.Order;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class OrderController {
     @Resource
-    private OrderService orderService;
-    @GetMapping("/order/{id}/{userId}")
-    public Order createOrder(@PathVariable("id") Long id,
-                             @PathVariable("userId") Long userId){
-        return orderService.createOrder(id,userId);
+    OrderService orderService;
+    @GetMapping("/create")
+    public Order createOrder(@RequestParam("userId") Long userId,
+                             @RequestParam("productId") Long productId){
+        return orderService.createOrder(productId,userId);
     }
 }
