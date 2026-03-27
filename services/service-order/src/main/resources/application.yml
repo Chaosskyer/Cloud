@@ -1,9 +1,57 @@
-Spring:
+# ============================================
+# Spring Boot 应用主配置文件
+# 配置应用名称、激活的 profile 以及 Nacos 连接信息
+# ============================================
+spring:
   Application:
     Name: service-order
+  profiles:
+    active: dev
   cloud:
     nacos:
-      discovery:
-        server-addr: 192.168.15.56:8848
+      server-addr: localhost:8848
+      config:
+        import-check:
+          enabled: false
+        namespace: "${spring.profiles.active: public}"
+
 server:
   port: 8080
+# ============================================
+# 开发环境（dev）配置块
+# 导入 Nacos 配置中心的 common.yml 和 database.yml 配置文件
+# 用于开发环境下的配置加载
+# ============================================
+---
+spring:
+  config:
+    import:
+      - nacos:common.yml?group=product
+      - nacos:common.yml?group=order
+      - nacos:database.yml?group=order
+    activate:
+      on-profile: dev
+# ============================================
+# 测试环境（test）配置块
+# 导入 Nacos 配置中心的 common.yml 配置文件
+# 用于测试环境下的配置加载
+# ============================================
+---
+spring:
+  config:
+    import:
+      - nacos:common.yml?group=order
+    activate:
+      on-profile: test
+# ============================================
+# 生产环境（prod）配置块
+# 导入 Nacos 配置中心的 common.yml 配置文件
+# 用于生产环境下的配置加载
+# ============================================
+---
+spring:
+  config:
+    import:
+      - nacos:common.yml?group=order
+    activate:
+      on-profile: prod

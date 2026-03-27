@@ -1,11 +1,13 @@
 package com.lzh.order.service;
 
+import com.lzh.order.config.OrderConfigurationProperties;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import lzh.Order.bean.Order;
 import lzh.Product.bean.Product;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -22,9 +24,13 @@ public class OrderServiceImpl implements OrderService{
     @Resource
     RestTemplate restTemplate;
 
+    @Resource
+    LoadBalancerClient loadBalancerClient;
+
+
     @Override
     public Order createOrder(Long productId, Long userId) {
-        Product product = getProduct(productId);
+        Product product = getProductwithBalancer(productId);
         Order order = new Order();
         order.setId(1L);
         order.setTotalAmount(product.getPrice().multiply(new BigDecimal(product.getNum())));
@@ -35,10 +41,36 @@ public class OrderServiceImpl implements OrderService{
         return order;
     }
 
+    /**
+     * 不带负载均衡的方式
+     * @param productId
+     * @return
+     */
     private Product getProduct(Long productId){
         List<ServiceInstance> instances = discoveryClient.getInstances("service-product");
         ServiceInstance instance = instances.get(0);
         String url = "http://"+instance.getHost()+":"+instance.getPort()+"/product/"+productId;
+        log.info("远程请求:{}",url);
+        return restTemplate.getForObject(url,Product.class);
+    }
+    /**
+     * 带负载均衡的方式
+     * @param productId
+     * @return
+     */
+    private Product getProductwithBalancerClient(Long productId){
+        ServiceInstance choose = loadBalancerClient.choose("service-product");
+        String url = "http://"+choose.getHost()+":"+choose.getPort()+"/product/"+productId;
+        log.info("远程请求:{}",url);
+        return restTemplate.getForObject(url,Product.class);
+    }
+    /**
+     * 带注解型负载均衡的方式
+     * @param productId
+     * @return
+     */
+    private Product getProductwithBalancer(Long productId){
+        String url = "http://service-product/product/"+productId;
         log.info("远程请求:{}",url);
         return restTemplate.getForObject(url,Product.class);
     }
