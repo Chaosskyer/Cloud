@@ -1,5 +1,6 @@
 package com.lzh.order.service;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.lzh.order.config.OrderConfigurationProperties;
 import com.lzh.order.feign.ProductFeignClient;
 import jakarta.annotation.Resource;
@@ -30,7 +31,7 @@ public class OrderServiceImpl implements OrderService{
 
     @Resource
     ProductFeignClient productFeignClient;
-
+    @SentinelResource("创建订单服务")
     @Override
     public Order createOrder(Long productId, Long userId) {
 //        Product product = getProductwithBalancer(productId);
