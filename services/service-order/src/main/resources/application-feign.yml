@@ -1,0 +1,11 @@
+spring:
+  cloud:
+    openfeign:
+      client:
+        config:
+          service-product:
+            connect-timeout: 3000
+            read-timeout: 5000
+feign:
+  sentinel:
+    enabled: true

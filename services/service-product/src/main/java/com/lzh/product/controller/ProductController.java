@@ -3,6 +3,7 @@ package com.lzh.product.controller;
 
 import com.lzh.product.service.ProductService;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import lzh.Product.bean.Product;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,8 +15,9 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping("/product/{id}")
-    public Product getProduct(@PathVariable("id") Long id){
-        System.out.println("接收到请求");
+    public Product getProduct(@PathVariable("id") Long id,
+                              HttpServletRequest  request){
+        System.out.println("接收到请求"+request.getHeader("token"));
         return productService.getProduct(id);
     }
 }

@@ -1,6 +1,7 @@
 package com.lzh.order.service;
 
 import com.lzh.order.config.OrderConfigurationProperties;
+import com.lzh.order.feign.ProductFeignClient;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import lzh.Order.bean.Order;
@@ -27,10 +28,13 @@ public class OrderServiceImpl implements OrderService{
     @Resource
     LoadBalancerClient loadBalancerClient;
 
+    @Resource
+    ProductFeignClient productFeignClient;
 
     @Override
     public Order createOrder(Long productId, Long userId) {
-        Product product = getProductwithBalancer(productId);
+//        Product product = getProductwithBalancer(productId);
+        Product product = productFeignClient.getProductById(productId);
         Order order = new Order();
         order.setId(1L);
         order.setTotalAmount(product.getPrice().multiply(new BigDecimal(product.getNum())));
