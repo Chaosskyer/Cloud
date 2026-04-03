@@ -1,6 +1,7 @@
 package com.lzh.order.service;
 
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
+import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.lzh.order.config.OrderConfigurationProperties;
 import com.lzh.order.feign.ProductFeignClient;
 import jakarta.annotation.Resource;
@@ -31,7 +32,7 @@ public class OrderServiceImpl implements OrderService{
 
     @Resource
     ProductFeignClient productFeignClient;
-    @SentinelResource("创建订单服务")
+    @SentinelResource(value = "创建订单服务",blockHandler = "createOrderFallback")
     @Override
     public Order createOrder(Long productId, Long userId) {
 //        Product product = getProductwithBalancer(productId);
@@ -43,6 +44,16 @@ public class OrderServiceImpl implements OrderService{
         order.setNickName("陆小千");
         order.setAddress("上海");
         order.setProductList(Arrays.asList(product));
+        return order;
+    }
+
+    public Order createOrderFallback(Long productId, Long userId, BlockException e) {
+        Order order = new Order();
+        order.setId(1L);
+        order.setTotalAmount(new BigDecimal(999999));
+        order.setUserId(userId);
+        order.setNickName("未知用户");
+        order.setAddress("异常报错信息："+e.getClass());
         return order;
     }
 
